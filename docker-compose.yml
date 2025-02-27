@@ -14,6 +14,22 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  python_app:
+    build:
+      context: src/main/python
+      dockerfile: dockerfile
+    depends_on:
+      - postgres
+    volumes:
+      - ./src/main/python:/app
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: postgres  # Name des PostgreSQL-Containers
+      POSTGRES_PORT: 5432
+    command: ["python", "fetcher.py"]
+
 volumes:
   postgres_data:
     driver: local
