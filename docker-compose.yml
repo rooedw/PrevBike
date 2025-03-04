@@ -28,7 +28,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_HOST: postgres  # Name des PostgreSQL-Containers
       POSTGRES_PORT: 5432
-    command: ["python", "fetcher.py"]
+      API_URL: ${API_URL}
+      TIMEZONE: ${TIMEZONE}
+    command: ["python", "-u", "fetcher.py"]
 
 volumes:
   postgres_data:
