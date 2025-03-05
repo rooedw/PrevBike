@@ -32,6 +32,21 @@ services:
       TIMEZONE: ${TIMEZONE}
     command: ["python", "-u", "fetcher.py"]
 
+  springboot_app:
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: bike_backend
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
 volumes:
   postgres_data:
     driver: local
