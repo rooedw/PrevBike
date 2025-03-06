@@ -10,7 +10,8 @@ from psycopg2.extras import execute_batch
 import requests
 import pytz
 
-table_name = "bike_positions"
+positions_table_name = "bike_positions"
+timestamps_table_name = "bike_timestamps"
 
 
 DB_NAME = os.getenv("POSTGRES_DB")
@@ -118,11 +119,16 @@ def save_data(converted_data):
     cursor = connection.cursor()
 
     query = f"""
-        INSERT INTO {table_name} (townId, bikeId, location, timestamp)
-        VALUES (%s, %s, ST_SetSRID(ST_MakePoint(%s, %s), 4326), %s)
+        INSERT INTO {positions_table_name} (townId, bikeId, location, timestamp)
+        VALUES (%s, %s, ST_SetSRID(ST_MakePoint(%s, %s), 4326), %s);
     """
-
     execute_batch(cursor, query, converted_data)  # Efficient batch insert
+
+    query_timestamp = f"""
+        INSERT INTO {timestamps_table_name} (fetch_time)
+            VALUES ('{converted_data[0][-1]}');
+    """
+    cursor.execute(query_timestamp)
 
     connection.commit()
     cursor.close()
@@ -130,30 +136,37 @@ def save_data(converted_data):
 
 def create_db():
     query = sql.SQL(f"""
-        CREATE TABLE {table_name} (
+        CREATE TABLE {positions_table_name} (
           entryId SERIAL PRIMARY KEY,
           townId INTEGER NOT NULL,
           bikeId INTEGER NOT NULL,
           location GEOGRAPHY(Point, 4326),  -- Geografischer Punkt mit SRID 4326 (WGS 84)
           timestamp TIMESTAMP WITHOUT TIME ZONE
         );
-        CREATE INDEX idx_{table_name}_location ON {table_name} USING GIST(location);
-        CREATE INDEX idx_{table_name}_town_id ON {table_name} (townId);
-        CREATE INDEX idx_{table_name}_weekday ON {table_name} (EXTRACT(DOW FROM timestamp));
-        CREATE INDEX idx_{table_name}_hour ON {table_name} (EXTRACT(HOUR FROM timestamp));
+        CREATE INDEX idx_{positions_table_name}_location ON {positions_table_name} USING GIST(location);
+        CREATE INDEX idx_{positions_table_name}_town_id ON {positions_table_name} (townId);
+        CREATE INDEX idx_{positions_table_name}_weekday ON {positions_table_name} (EXTRACT(DOW FROM timestamp));
+        CREATE INDEX idx_{positions_table_name}_hour ON {positions_table_name} (EXTRACT(HOUR FROM timestamp));
 
-        CREATE INDEX idx_{table_name}_weekday_hour ON {table_name} (
+        CREATE INDEX idx_{positions_table_name}_weekday_hour ON {positions_table_name} (
             EXTRACT(DOW FROM timestamp),
             EXTRACT(HOUR FROM timestamp)
         );
 
-        CREATE INDEX idx_{table_name}_town_location_weekday_hour ON {table_name} (
+        CREATE INDEX idx_{positions_table_name}_town_location_weekday_hour ON {positions_table_name} (
             townId,
             location,
             EXTRACT(DOW FROM timestamp),
             EXTRACT(HOUR FROM timestamp)
          );
+         
+         CREATE TABLE {timestamps_table_name} (
+            id BIGSERIAL PRIMARY KEY,
+            fetch_time TIMESTAMP
+        );
+        
     """)
+    #CREATE INDEX idx_{timestamps_table_name} ON {timestamps_table_name} (fetch_time);
 
     cursor = connection.cursor()
     cursor.execute(query)
@@ -167,7 +180,7 @@ def table_exists():
         SELECT EXISTS (
             SELECT 1
             FROM information_schema.tables
-            WHERE table_name = '{table_name}'
+            WHERE table_name = '{positions_table_name}'
         );
     """)
     cursor.execute(query)

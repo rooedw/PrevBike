@@ -8,6 +8,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/bikeapi")
 public class BikeController {
+
+    private final PostgisService postgisService;
+
+    public BikeController(PostgisService postgisService) {
+        this.postgisService = postgisService;
+    }
+
     @GetMapping("/num")
     public int getAnswer() {
         return 42;
@@ -18,5 +25,11 @@ public class BikeController {
                         @RequestParam int age,
                         @RequestParam String city) {
         return "Hello, " + name + ". You are " + age + " years old and live in " + city + ".";
+    }
+
+    @GetMapping("/postgis")
+    public int doPostgis() {
+        postgisService.printLocations();
+        return 0;
     }
 }
