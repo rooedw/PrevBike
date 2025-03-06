@@ -36,9 +36,5 @@ out/
 ### VS Code ###
 .vscode/
 
-# Environment & Sensible Daten
+# Environment
 .env
-application.properties
-application.yml
-application-local.properties
-application-local.yml
