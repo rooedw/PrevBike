@@ -125,7 +125,7 @@ def save_data(converted_data):
     execute_batch(cursor, query, converted_data)  # Efficient batch insert
 
     query_timestamp = f"""
-        INSERT INTO {timestamps_table_name} (fetch_time)
+        INSERT INTO {timestamps_table_name} (timestamp)
             VALUES ('{converted_data[0][-1]}');
     """
     cursor.execute(query_timestamp)
@@ -162,7 +162,7 @@ def create_db():
          
          CREATE TABLE {timestamps_table_name} (
             id BIGSERIAL PRIMARY KEY,
-            fetch_time TIMESTAMP
+            timestamp TIMESTAMP
         );
         
     """)
@@ -198,3 +198,4 @@ if __name__ == '__main__':
 
 
 # psql -h localhost -p 5432 -U myuser -d prevbikedb
+

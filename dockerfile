@@ -5,7 +5,7 @@ FROM openjdk:23-jdk-slim
 WORKDIR /app
 
 # Kopiere das JAR-File (erstellt mit Gradle)
-COPY build/libs/PrevBike-0.0.1-SNAPSHOT.jar app.jar
+#COPY build/libs/PrevBike-0.0.1-SNAPSHOT.jar app.jar
 
 # Starte die Anwendung
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "PrevBike-0.0.1-SNAPSHOT.jar"]

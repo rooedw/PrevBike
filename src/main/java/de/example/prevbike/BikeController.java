@@ -5,6 +5,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
 @RestController
 @RequestMapping("/bikeapi")
 public class BikeController {
@@ -31,5 +34,19 @@ public class BikeController {
     public int doPostgis() {
         postgisService.printLocations();
         return 0;
+    }
+
+    @GetMapping("/probability")
+    public float getBikeProbability() {
+        float lat = 49.011223016021454F;
+        float lon = 88.416850309144804F;
+        Timestamp futureTimestamp = Timestamp.valueOf(LocalDateTime.now().plusDays(7).plusHours(1));
+        return postgisService.getBikeProbability(PostgisService.RequestMode.SAME_WEEKDAY, lat, lon, 200f, futureTimestamp, 3, 30);
+
+        /*
+        * @RequestParam float lat,
+                                  @RequestParam float lon,
+                                  @RequestParam float radius
+        * */
     }
 }

@@ -2,6 +2,7 @@ package de.example.prevbike;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.sql.Timestamp;
@@ -11,8 +12,8 @@ import java.sql.Timestamp;
 public class PostgisService {
 
     private final JdbcTemplate jdbcTemplate;
-    private enum RequestMode {
-        ALL, SAME_DAYTYPE, SAME_WEEKDAY
+    public enum RequestMode {
+        ALL, SAME_DAY_TYPE, SAME_WEEKDAY
     }
 
 
@@ -39,54 +40,71 @@ public class PostgisService {
         );
     }
 
+
+
     // radius in meters; halfMinuteRange=30 => 60 total range
-    private float getBikeProbability(RequestMode requestMode, float lat, float lon, float radius, Timestamp requestTimestamp, int weekRange, int halfMinuteRange) {
+    public float getBikeProbability(RequestMode requestMode, float lat, float lon, float radius, Timestamp requestTimestamp, int weekRange, int halfMinuteRange) {
 
-        LocalDate requestDate = requestTimestamp.toLocalDateTime().toLocalDate();
-        LocalTime requestTime = requestTimestamp.toLocalDateTime().toLocalTime();
+        assert requestTimestamp.after(new Timestamp(System.currentTimeMillis()))
+                : "requestTimestamp must be in the future!";
 
-        LocalDate todayDate = LocalDate.now();  // todo: check if okay with timezone
-
-        assert //todo requestTimestamp ist größer als aktuelle Zeit
-
-        //"2024-08-02 23:12:00"
-        // where location, hour range, day
-
-        assert requestMode == RequestMode.SAME_WEEKDAY;
-        String sql = """
+        // count time slots in which at least one bike was available
+        String sql_available_bikes = """
             SELECT COUNT(DISTINCT timestamp) AS time_slot_count
             FROM bike_positions
-            WHERE ST_DWithin(location, ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography, ?)
-            AND timestamp::TIME BETWEEN (?::TIME - INTERVAL '? minutes')\s
-                                    AND (?::TIME + INTERVAL '? minutes')
-            AND timestamp BETWEEN (?::DATE - INTERVAL '? weeks')\s
-                                AND (?::DATE - INTERVAL '1 day')
-            AND EXTRACT(DOW FROM timestamp) = EXTRACT(DOW FROM ?::DATE);
+            WHERE ST_DWithin(location, ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography, ?) AND
         """;
 
-        Integer time_slot_count = jdbcTemplate.queryForObject(sql,
+        String timeSelectionString = timeQueryBuilder(requestMode, requestTimestamp, weekRange, halfMinuteRange);
+        sql_available_bikes += timeSelectionString + ";";
+
+        Integer time_slot_count = jdbcTemplate.queryForObject(sql_available_bikes,
                 (rs, rowNum) -> rs.getInt("time_slot_count"),
-                lon, lat, radius, requestTime, halfMinuteRange, requestTime, halfMinuteRange, todayDate, weekRange, todayDate, requestDate
-        );
-        if (time_slot_count == null) {
-            time_slot_count = 0;
-        }
+                lon, lat, radius);
+        if (time_slot_count == null) time_slot_count = 0;
 
 
-        if (requestMode == RequestMode.SAME_WEEKDAY) {
-            int days = weekRange+1;
-        }
-        int time_slots_per_day = 60
+        // count fetches of bike api in selected time period
+        String sql_fetch_times = """
+            SELECT COUNT(DISTINCT timestamp) AS fetch_time_count
+            FROM bike_timestamps WHERE
+        """;
+        sql_fetch_times += timeSelectionString + ";";
 
+        Integer fetch_time_count = jdbcTemplate.queryForObject(sql_fetch_times,
+                (rs, rowNum) -> rs.getInt("fetch_time_count"));
+        if (fetch_time_count == null) fetch_time_count = 0;
 
+        if (fetch_time_count == 0) return -1f;  // todo: return error
 
-        switch (requestMode) {
-            case ALL ->
-        }
-        int total_time_slot_count = // todo
-        float probability = (float) time_slot_count / total_time_slot_count;
+        float probability = (float) time_slot_count / fetch_time_count;
         return probability;
     }
 
+
+    private String timeQueryBuilder(RequestMode requestMode, Timestamp requestTimestamp, int weekRange, int halfMinuteRange) {
+        LocalDate requestDate = requestTimestamp.toLocalDateTime().toLocalDate();
+        LocalTime requestTime = requestTimestamp.toLocalDateTime().toLocalTime();
+        LocalDate todayDate = LocalDate.now();  // todo: check if okay with timezone
+
+        // between [start, end)
+        String sql = String.format("""
+             timestamp::TIME BETWEEN ('%s'::TIME - INTERVAL '%s minutes')
+                                    AND ('%s'::TIME + INTERVAL '%s minutes')
+            AND timestamp BETWEEN ('%s'::DATE - INTERVAL '%s weeks')
+                                    AND ('%s'::DATE)
+            """,
+                requestTime, halfMinuteRange, requestTime, halfMinuteRange, todayDate, weekRange, todayDate);
+        if (requestMode == RequestMode.SAME_WEEKDAY) {
+            sql += String.format(" AND EXTRACT(DOW FROM timestamp) = EXTRACT(DOW FROM '%s'::DATE)", requestDate);
+        } else if (requestMode == RequestMode.SAME_DAY_TYPE) {
+            DayOfWeek requestDayOfWeek = requestDate.getDayOfWeek();
+            String range = (requestDayOfWeek == DayOfWeek.SATURDAY || requestDayOfWeek == DayOfWeek.SUNDAY) ? "(0, 6)" : "(1, 2, 3, 4, 5)";
+            sql += " AND EXTRACT(DOW FROM timestamp) IN " + range;
+        }
+        // requestMode == RequestMode.ALL  --> nop
+
+        return sql;
+    }
 
 }
