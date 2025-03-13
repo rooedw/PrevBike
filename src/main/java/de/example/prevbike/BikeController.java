@@ -7,10 +7,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
+import de.example.prevbike.PostgisService.RequestMode;
 
 @RestController
 @RequestMapping("/bikeapi")
 public class BikeController {
+    private static final float MAX_RADIUS = 5000f;
+    private static final float MAX_HALF_MINUTE_RANGE = 720;
+
 
     private final PostgisService postgisService;
 
@@ -23,30 +30,46 @@ public class BikeController {
         return 42;
     }
 
-    @GetMapping("/greet")
-    public String greet(@RequestParam String name,
-                        @RequestParam int age,
-                        @RequestParam String city) {
-        return "Hello, " + name + ". You are " + age + " years old and live in " + city + ".";
-    }
-
-    @GetMapping("/postgis")
-    public int doPostgis() {
-        postgisService.printLocations();
-        return 0;
-    }
-
-    @GetMapping("/probability")
-    public float getBikeProbability() {
+    @GetMapping("/probability_test")
+    public float getBikeProbabilityTest() {
         float lat = 49.011223016021454F;
-        float lon = 88.416850309144804F;
+        float lon = 8.416850309144804F;
         Timestamp futureTimestamp = Timestamp.valueOf(LocalDateTime.now().plusDays(7).plusHours(1));
-        return postgisService.getBikeProbability(PostgisService.RequestMode.SAME_WEEKDAY, lat, lon, 200f, futureTimestamp, 3, 30);
 
-        /*
-        * @RequestParam float lat,
-                                  @RequestParam float lon,
-                                  @RequestParam float radius
-        * */
+        return postgisService.getBikeProbability(PostgisService.RequestMode.SAME_WEEKDAY, lat, lon, 200f, futureTimestamp, 3, 30);
+    }
+
+    // probability?lat=49.011223016021454&lon=8.416850309144804&radius=500.0&weekRange=5&halfMinuteRange=30&requestModeString=ALL&requestTimestampString=2025-03-15T16:20:00
+    @GetMapping("/probability")
+    public float getBikeProbability(@RequestParam float lat,
+                                    @RequestParam float lon,
+                                    @RequestParam float radius,
+                                    @RequestParam int weekRange,
+                                    @RequestParam int halfMinuteRange,
+                                    @RequestParam String requestModeString,
+                                    @RequestParam String requestTimestampString) {
+        System.out.println("Requested parameters: " + lat + ", " + lon + ", " + radius + ", " + weekRange + ", " + halfMinuteRange + ", " + requestModeString + ", " + requestTimestampString);
+
+        if (lat > 90f || lat < -90f || lon > 180f || lon < -180f) throw new InvalidParameterException("Illegal coordinates");
+        if (radius < 0 || radius > MAX_RADIUS) throw new InvalidParameterException("Illegal radius");
+        if (weekRange < 0) throw new InvalidParameterException("Illegal week range");
+        if (halfMinuteRange < 0 || halfMinuteRange > MAX_HALF_MINUTE_RANGE) throw new InvalidParameterException("Illegal half minute range");
+
+        RequestMode requestMode;
+        try {
+            requestMode = RequestMode.valueOf(requestModeString);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidParameterException("Illegal request mode");
+        }
+
+        Timestamp requestTimestamp;
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+            requestTimestamp = Timestamp.valueOf(LocalDateTime.parse(requestTimestampString, formatter));
+        } catch (DateTimeParseException e) {
+            throw new InvalidParameterException("Illegal requestTimestamp format. Use: yyyy-MM-dd'T'HH:mm:ss");
+        }
+
+        return postgisService.getBikeProbability(requestMode, lat, lon, radius, requestTimestamp, weekRange, halfMinuteRange);
     }
 }

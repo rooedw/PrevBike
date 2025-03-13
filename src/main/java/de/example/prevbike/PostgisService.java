@@ -21,32 +21,13 @@ public class PostgisService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void printLocations() {
-        jdbcTemplate.query(
-                "SELECT entryId, ST_AsText(location) AS location_text FROM bike_positions LIMIT 2",
-                (rs, rowNum) -> {
-                    Long id = rs.getLong("entryId");
-                    String coordinates = rs.getString("location_text");
-                    System.out.println("ID: " + id + ", Coordinates: " + coordinates);
-                    return null;
-                }
-        );
-    }
-
-    public String getLocation() {
-        return jdbcTemplate.queryForObject(
-                "SELECT ST_AsText(location) AS location_text FROM bike_positions LIMIT 1",
-                (rs, rowNum) -> rs.getString("location_text")
-        );
-    }
-
-
 
     // radius in meters; halfMinuteRange=30 => 60 total range
-    public float getBikeProbability(RequestMode requestMode, float lat, float lon, float radius, Timestamp requestTimestamp, int weekRange, int halfMinuteRange) {
+    public float getBikeProbability(RequestMode requestMode, float lat, float lon, float radius, Timestamp requestTimestamp, int weekRange, int halfMinuteRange) throws InvalidParameterException {
 
-        assert requestTimestamp.after(new Timestamp(System.currentTimeMillis()))
-                : "requestTimestamp must be in the future!";
+        if (!requestTimestamp.after(new Timestamp(System.currentTimeMillis()))) {
+            throw new InvalidParameterException("requestTimestamp must be in the future!");
+        }
 
         // count time slots in which at least one bike was available
         String sql_available_bikes = """
@@ -74,8 +55,7 @@ public class PostgisService {
         Integer fetch_time_count = jdbcTemplate.queryForObject(sql_fetch_times,
                 (rs, rowNum) -> rs.getInt("fetch_time_count"));
         if (fetch_time_count == null) fetch_time_count = 0;
-
-        if (fetch_time_count == 0) return -1f;  // todo: return error
+        if (fetch_time_count == 0) throw new MissingDataException("No data available for this time period!");
 
         float probability = (float) time_slot_count / fetch_time_count;
         return probability;
@@ -85,7 +65,7 @@ public class PostgisService {
     private String timeQueryBuilder(RequestMode requestMode, Timestamp requestTimestamp, int weekRange, int halfMinuteRange) {
         LocalDate requestDate = requestTimestamp.toLocalDateTime().toLocalDate();
         LocalTime requestTime = requestTimestamp.toLocalDateTime().toLocalTime();
-        LocalDate todayDate = LocalDate.now();  // todo: check if okay with timezone
+        LocalDate todayDate = LocalDate.now().plusDays(1);  // todo: check if okay with timezone
 
         // between [start, end)
         String sql = String.format("""
@@ -95,6 +75,7 @@ public class PostgisService {
                                     AND ('%s'::DATE)
             """,
                 requestTime, halfMinuteRange, requestTime, halfMinuteRange, todayDate, weekRange, todayDate);
+
         if (requestMode == RequestMode.SAME_WEEKDAY) {
             sql += String.format(" AND EXTRACT(DOW FROM timestamp) = EXTRACT(DOW FROM '%s'::DATE)", requestDate);
         } else if (requestMode == RequestMode.SAME_DAY_TYPE) {
