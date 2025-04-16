@@ -1,0 +1,30 @@
+.logofont {
+    font-family: "Special Gothic Condensed One", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.rounded-header {
+    position: absolute;
+    top: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 75px;
+    background-color: rgba(255, 107, 0, 0.65); /* halbtransparent orange */
+    color: white;
+    border-radius: 0px 0px 24px 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.rounded-header .btn {
+    pointer-events: auto;
+}
+
+.logo-center {
+    height: 50px;
+    background-color: transparent; /* Hintergrund transparent lassen */
+    padding: 0; /* Kein zusätzlicher Abstand */
+}
