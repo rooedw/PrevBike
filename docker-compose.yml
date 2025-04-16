@@ -15,13 +15,14 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   python_app:
+    container_name: python_data_fetcher
     build:
-      context: src/main/python
+      context: data_fetcher
       dockerfile: dockerfile
     depends_on:
       - postgres
     volumes:
-      - ./src/main/python:/app
+      - ./data_fetcher:/app
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -34,13 +35,13 @@ services:
 
   springboot_app:
     build:
-      context: .
+      context: backend
       dockerfile: dockerfile
     container_name: bike_backend
     depends_on:
       - postgres
     volumes:
-      - ./build/libs:/app
+      - ./backend/build/libs:/app
     ports:
       - "8080:8080"
     environment:
