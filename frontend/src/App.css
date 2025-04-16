@@ -11,7 +11,7 @@
     transform: translateX(-50%);
     width: 60%;
     height: 75px;
-    background-color: rgba(255, 107, 0, 0.65); /* halbtransparent orange */
+    background-color: rgba(255, 107, 0, 0.65); /* half-transparent orange */
     color: white;
     border-radius: 0px 0px 24px 24px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -25,6 +25,71 @@
 
 .logo-center {
     height: 50px;
-    background-color: transparent; /* Hintergrund transparent lassen */
-    padding: 0; /* Kein zusätzlicher Abstand */
+    background-color: transparent;
+    padding: 0;
+}
+
+.btn-primary {
+    background-color: #FF6800;
+    border-color: #575757;
+    color: black;
+}
+
+.btn-primary:hover {
+    background-color: #fd822c;
+    border-color: #989898;
+    color: black;
+}
+
+.btn-primary:active,
+.btn-primary:active:focus,
+.btn-primary:focus-visible {  /* button click */
+    background-color: #ffa263;
+    border-color: #989898;
+    color: black;
+    box-shadow: none;
+}
+
+
+.short-input-group-smaller {
+    width: 100%;
+}
+
+.short-input-smaller {
+    width: 96px;
+}
+
+.form-check-input:checked {
+    background-color: #FF6800;
+    border-color: #FF6800;
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(255, 165, 0, 0.25); /* Orange Glow */
+    border-color: #FF6800;
+}
+
+/* Chrome, Safari, Edge */
+input[type=range]::-webkit-slider-thumb {
+    background: #FF6800;
+    border: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+    background: #ffd699; /* light Orange */
+}
+
+/* Firefox */
+input[type=range]::-moz-range-thumb {
+    background: #FF6800;
+    border: none;
+}
+input[type=range]::-moz-range-track {
+    background: white;
+}
+
+input[type=range]:focus {
+    outline: none;
+}
+input[type=range]:focus::-webkit-slider-thumb {
+    box-shadow: 0 0 0 3px rgba(255,165,0,0.3);
 }
