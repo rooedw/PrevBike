@@ -1,9 +1,8 @@
-HELP.md
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+backend/.gradle
+backend/build/
+!backend/gradle/wrapper/gradle-wrapper.jar
+!**/backend/src/main/**/build/
+!**/backend/src/test/**/build/
 
 ### STS ###
 .apt_generated
@@ -14,8 +13,8 @@ build/
 .springBeans
 .sts4-cache
 bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
+!**/backend/src/main/**/bin/
+!**/backend/src/test/**/bin/
 
 ### IntelliJ IDEA ###
 .idea
