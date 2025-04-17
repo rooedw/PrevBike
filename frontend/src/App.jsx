@@ -1,15 +1,21 @@
-import { useState } from 'react'
+import {useEffect, useMemo, useState} from 'react'
 import prevBikeLogo from './assets/prevbike_logo_landscape.png'
 import React from 'react';
 import { Container, Row, Col, Button, Form, InputGroup, Collapse } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet';
 import './App.css'
+import CityDropdown from "./CityDropdown.jsx";
+import BikeMap from "./BikeMap.jsx";
+
 
 function App() {
-    const position = [49.0087159, 8.403911516];
     const [showAdvanced, setShowAdvanced] = useState(false);
+    const [selectedCity, setSelectedCity] = useState({lat: 49.0087159, lon: 8.403911516})
+
+    useEffect(() => {
+        console.log("selectedCity changed")
+    }, [selectedCity]);
 
     return (
         <Container fluid className="vh-100 d-flex flex-column">
@@ -17,12 +23,7 @@ function App() {
                 {/* Sidebar */}
                 <Col md={2} className="p-3" style={{ backgroundColor: '#FFDCB9', color: 'black' }}>
                     <Form>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Stadt</Form.Label>
-                            <Form.Control as="select">
-                                <option value="">Wähle eine Stadt</option>
-                            </Form.Control>
-                        </Form.Group>
+                        <CityDropdown setSelectedCity={setSelectedCity}></CityDropdown>
 
                         <Form.Group className="mb-3">
                             <Form.Label>Zeitpunkt</Form.Label>
@@ -103,22 +104,7 @@ function App() {
                         <Button variant="light" size="sm">ℹ️ Impressum</Button>
                     </div>
 
-                    <MapContainer
-                        center={position}
-                        zoom={16}
-                        style={{ height: '100%', width: '100%' }}
-                        zoomControl={false}
-                    >
-                        <TileLayer
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                            attribution="&copy; OpenStreetMap contributors"
-                        />
-                        <Marker position={position}>
-                            <Popup>Bike 1234</Popup>
-                        </Marker>
-
-                        <ZoomControl position="bottomright" />
-                    </MapContainer>
+                    <BikeMap mapSelectedCity={selectedCity}></BikeMap>
                 </Col>
             </Row>
         </Container>
