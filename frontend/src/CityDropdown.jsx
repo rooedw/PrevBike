@@ -1,7 +1,7 @@
 import {Form} from "react-bootstrap";
 import React, { useEffect, useState } from 'react';
 
-const CityDropdown = ({setSelectedCity}) => {
+const CityDropdown = ({handleJump}) => {
     const [cities, setCities] = useState([]);
 
     useEffect(() => {
@@ -13,7 +13,8 @@ const CityDropdown = ({setSelectedCity}) => {
                 )
                 setCities(sortedCities)
                 if (sortedCities.length > 0) {
-                    setSelectedCity(sortedCities[0])
+                    console.log("calling handlejump")
+                    handleJump(sortedCities[0])
                 }
             })
             .catch((err) => console.error('Error loading cities:', err));
@@ -22,14 +23,14 @@ const CityDropdown = ({setSelectedCity}) => {
     const handleCityChange = (e) => {
         const selectedCityId = parseInt(e.target.value)
         const selectedCity = cities.find((c) => c.townId === selectedCityId)
-        if (selectedCity) setSelectedCity(selectedCity)
+        if (selectedCity) handleJump(selectedCity)
         console.log('selected city:', selectedCity)
     }
 
     return (
         <Form.Group className="mb-3">
             <Form.Label>Stadt</Form.Label>
-            <Form.Control as="select" onClick={handleCityChange}>
+            <Form.Control as="select" onChange={handleCityChange}>
             {cities.map((city) => (
                 <option key={city.townId} value={city.townId}>
                     {city.cityName.trim()}

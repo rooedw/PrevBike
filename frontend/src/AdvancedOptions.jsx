@@ -1,7 +1,8 @@
 import React, {useState} from 'react';
 import {Collapse, Form, InputGroup} from "react-bootstrap";
+import LatLongInput from "./LatLongInput.jsx";
 
-function AdvancedOptions () {
+function AdvancedOptions ({searchPos, setSearchPos}) {
     const [showAdvanced, setShowAdvanced] = useState(false);
 
     return (
@@ -17,15 +18,7 @@ function AdvancedOptions () {
             <Collapse in={showAdvanced}>
                 <div id="advanced-options">
                     <Form.Label>Position</Form.Label>
-                    <InputGroup className="mb-2 ">
-                        <InputGroup.Text>Lat</InputGroup.Text>
-                        <Form.Control type="text" defaultValue="49.123456"/>
-                    </InputGroup>
-
-                    <InputGroup className="mb-3 ">
-                        <InputGroup.Text>Lon</InputGroup.Text>
-                        <Form.Control type="text" defaultValue="8.123456"/>
-                    </InputGroup>
+                    <LatLongInput searchPos={searchPos} setSearchPos={setSearchPos} />
 
                     <Form.Label>Betrachtungszeitraum</Form.Label>
                     <InputGroup className="mb-3 ">

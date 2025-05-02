@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from 'react'
+import {useEffect, useRef, useState} from 'react'
 import prevBikeLogo from './assets/prevbike_logo_landscape.png'
 import React from 'react';
 import { Container, Row, Col, Button, Form, InputGroup, Collapse } from 'react-bootstrap';
@@ -11,16 +11,46 @@ import AdvancedOptions from "./AdvancedOptions.jsx";
 import SearchTimePicker from "./SearchTimePicker.jsx";
 import RadiusSlider from "./RadiusSlider.jsx";
 import LocationComponent from "./LocationComponent.jsx";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLocationDot } from '@fortawesome/free-solid-svg-icons';
+
 
 
 function App() {
-    const [selectedCity, setSelectedCity] = useState({lat: 49.0087159, lon: 8.403911516})
+    const locationRef = useRef();
+    const mapRef = useRef();
+    const radiusSliderRef = useRef();
+    const searchTimePickerRef = useRef();
     const [searchPos, setSearchPos] = useState({lat: 49.0087159, lon: 8.403911516})
     const [placingMode, setPlacingMode] = useState(false);
 
-    useEffect(() => {
-        console.log("selectedCity changed")
-    }, [selectedCity]);
+    // set search pos to current position
+    const handleSetSearchPos = () => {
+        const pos = locationRef.current?.getPosition();
+        if (pos) {
+            setSearchPos(pos);
+            handleJump(pos);
+        }
+    };
+
+    // handle jump of map
+    const handleJump = ({lat, lon}) => {
+        console.log("called handleJump in app", lat, lon);
+        console.log(mapRef);
+        mapRef.current?.jump(lat, lon);
+    };
+
+    const handleSearch = async () => {
+        // probability?lat=49.011223016021454&lon=8.416850309144804&radius=500.0&weekRange=5&halfMinuteRange=30&requestModeString=ALL&requestTimestampString=2025-03-15T16:20:00
+        const radius = radiusSliderRef.current.getRadius();
+        const datetimeString = searchTimePickerRef.current.getDatetime().toISOString();
+        const weekRange = 5;
+        const halfMinuteRange = 30;
+        const requestModeString = "ALL";
+        const response = await fetch(`http://localhost:8080/bikeapi/probability?lat=${searchPos.lat}&lon=${searchPos.lon}&radius=${radius}&weekRange=${weekRange}&halfMinuteRange=${halfMinuteRange}&requestModeString=${requestModeString}&requestTimestampString=${datetimeString}`);
+        const data = await response.json();
+        console.log(data);
+    };
 
     return (
         <Container fluid className="vh-100 d-flex flex-column">
@@ -28,26 +58,29 @@ function App() {
                 {/* Sidebar */}
                 <Col md={2} className="p-3" style={{ backgroundColor: '#FFDCB9', color: 'black' }}>
                     <Form>
-                        <CityDropdown setSelectedCity={setSelectedCity}></CityDropdown>
+                        <CityDropdown handleJump={handleJump}></CityDropdown>
 
                         <Form.Group className="mb-3">
                             <Form.Label>Zeitpunkt</Form.Label>
-                            <SearchTimePicker  />
+                            <SearchTimePicker ref={searchTimePickerRef} />
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <RadiusSlider/>
+                            <RadiusSlider ref={radiusSliderRef}/>
                             <Button variant={placingMode ? "danger" : "light"} className="mt-2" onClick={() => setPlacingMode(!placingMode)}>
                                 {placingMode ? "Klick auf die Karte..." : "Suchpositionsmarker platzieren"}
                             </Button>
+                            <Button onClick={handleSetSearchPos} className="mt-2 ms-1">
+                                <FontAwesomeIcon icon={faLocationDot} />
+                            </Button>
                         </Form.Group>
 
-                        <AdvancedOptions/>
-                        <LocationComponent/>
+                        <AdvancedOptions searchPos={searchPos} setSearchPos={setSearchPos}/>
+                        <LocationComponent ref={locationRef}/>
 
                         <Button variant="light" className="mb-3">Suche speichern</Button>
                         <Button variant="light" className="mb-3">Suche laden</Button>
-                        <Button variant="primary" className="mb-3">Suche starten</Button>
+                        <Button variant="primary" className="mb-3" onClick={handleSearch}>Suche starten</Button>
 
                         <div className="bg-light text-dark p-2">
                             Wahrscheinlichkeit für Zeitraum x - y: <strong>10%</strong>
@@ -72,7 +105,7 @@ function App() {
                         <Button variant="light" size="sm">ℹ️ Impressum</Button>
                     </div>
 
-                    <BikeMap mapSelectedCity={selectedCity} mapSearchPos={searchPos} setSearchPos={setSearchPos} placingMode={placingMode} setPlacingMode={setPlacingMode}></BikeMap>
+                    <BikeMap ref={mapRef} mapSearchPos={searchPos} setSearchPos={setSearchPos} placingMode={placingMode} setPlacingMode={setPlacingMode}></BikeMap>
                 </Col>
             </Row>
         </Container>

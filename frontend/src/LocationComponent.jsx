@@ -1,7 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 
-const LocationComponent = () => {
+const LocationComponent = forwardRef((props, ref) => {
     const [position, setPosition] = useState(null);
+
+    useImperativeHandle(ref, () => ({
+        getPosition: () => position,
+    }));
 
     useEffect(() => {
         if (!navigator.geolocation) {
@@ -30,10 +34,8 @@ const LocationComponent = () => {
 
     return (
         <div>
-            <p>Breitengrad: {position.lat}</p>
-            <p>Längengrad: {position.lon}</p>
         </div>
     );
-};
+});
 
 export default LocationComponent;

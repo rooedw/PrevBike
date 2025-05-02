@@ -1,10 +1,14 @@
-import { useState } from 'react';
+import {useState, forwardRef, useImperativeHandle} from 'react';
 import { Form } from 'react-bootstrap';
 
-function RadiusSlider() {
+const RadiusSlider = forwardRef((props, ref) => {
     const [radius, setRadius] = useState(100);
     const min = 20;
     const max = 500;
+
+    useImperativeHandle(ref, () => ({
+        getRadius: () => radius,
+    }));
 
     return (
         <Form.Group className="mb-3">
@@ -26,6 +30,6 @@ function RadiusSlider() {
 
         </Form.Group>
     );
-}
+});
 
 export default RadiusSlider;
