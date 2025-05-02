@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -27,7 +28,7 @@ public class BikeController {
 
     @GetMapping("/num")
     public int getAnswer() {
-        return 42;
+        return 43;
     }
 
     @GetMapping("/probability_test")
@@ -40,6 +41,7 @@ public class BikeController {
     }
 
     // probability?lat=49.011223016021454&lon=8.416850309144804&radius=500.0&weekRange=5&halfMinuteRange=30&requestModeString=ALL&requestTimestampString=2025-03-15T16:20:00
+    @CrossOrigin
     @GetMapping("/probability")
     public float getBikeProbability(@RequestParam float lat,
                                     @RequestParam float lon,
