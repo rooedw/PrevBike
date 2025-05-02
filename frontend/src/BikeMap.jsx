@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {MapContainer, Marker, Popup, TileLayer, useMap, ZoomControl} from "react-leaflet";
 
 const BikeMap = ({mapSelectedCity}) => {
+    const [lastJumpPos, setLastJumpPos] = useState({lat: 0, lon: 0})
 
     function ChangeMapView() {
         const map = useMap()
