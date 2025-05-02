@@ -7,6 +7,8 @@ import 'leaflet/dist/leaflet.css';
 import './App.css'
 import CityDropdown from "./CityDropdown.jsx";
 import BikeMap from "./BikeMap.jsx";
+import AdvancedOptions from "./AdvancedOptions.jsx";
+import SearchTimePicker from "./SearchTimePicker.jsx";
 
 
 function App() {
@@ -27,8 +29,9 @@ function App() {
 
                         <Form.Group className="mb-3">
                             <Form.Label>Zeitpunkt</Form.Label>
-                            <Form.Control type="datetime-local" defaultValue="2025-01-01T12:42" />
+                            <SearchTimePicker  />
                         </Form.Group>
+
 
                         <Form.Group className="mb-3">
                             <Form.Label>Suchradius (m)</Form.Label>
