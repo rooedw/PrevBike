@@ -23,6 +23,7 @@ function App() {
     const searchTimePickerRef = useRef();
     const [searchPos, setSearchPos] = useState({lat: 49.0087159, lon: 8.403911516})
     const [placingMode, setPlacingMode] = useState(false);
+    const [bikeProbability, setBikeProbability] = useState(0.0);
 
     // set search pos to current position
     const handleSetSearchPos = () => {
@@ -43,13 +44,18 @@ function App() {
     const handleSearch = async () => {
         // probability?lat=49.011223016021454&lon=8.416850309144804&radius=500.0&weekRange=5&halfMinuteRange=30&requestModeString=ALL&requestTimestampString=2025-03-15T16:20:00
         const radius = radiusSliderRef.current.getRadius();
-        const datetimeString = searchTimePickerRef.current.getDatetime().toISOString();
+        const datetimeString = searchTimePickerRef.current.getDatetime().toISOString().slice(0, 19);
         const weekRange = 5;
         const halfMinuteRange = 30;
         const requestModeString = "ALL";
         const response = await fetch(`http://localhost:8080/bikeapi/probability?lat=${searchPos.lat}&lon=${searchPos.lon}&radius=${radius}&weekRange=${weekRange}&halfMinuteRange=${halfMinuteRange}&requestModeString=${requestModeString}&requestTimestampString=${datetimeString}`);
-        const data = await response.json();
-        console.log(data);
+        if (response.ok) {
+            const data = await response.json();
+            console.log(data); // Success — do something with `data`
+            setBikeProbability(data);
+        } else {
+            console.error(`Error ${response.status}: ${response.statusText}`);
+        }
     };
 
     return (
@@ -83,7 +89,7 @@ function App() {
                         <Button variant="primary" className="mb-3" onClick={handleSearch}>Suche starten</Button>
 
                         <div className="bg-light text-dark p-2">
-                            Wahrscheinlichkeit für Zeitraum x - y: <strong>10%</strong>
+                            Wahrscheinlichkeit für Zeitraum x - y: <strong>{bikeProbability*100}%</strong>
                         </div>
 
                         <Form.Check type="checkbox" label="nextbikes anzeigen" defaultChecked className="mt-2" />
