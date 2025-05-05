@@ -11,23 +11,22 @@ const RadiusSlider = forwardRef((props, ref) => {
     }));
 
     return (
-        <Form.Group className="mb-3">
-            <Form.Label>
-                Suchradius (m): {radius}
-            </Form.Label>
+        <Form.Group className="mb-2">
+            <Form.Label>Suchradius (m): {radius}</Form.Label>
 
-            <Form.Range
-                min={min}
-                max={max}
-                value={radius}
-                onChange={(e) => setRadius(Number(e.target.value))}
-            />
+            <div className="d-flex align-items-center">
+                <small className="me-1" style={{ width: '60px', textAlign: 'right' }}>{min} m</small>
 
-            <div className="d-flex justify-content-between">
-                <small>{min} m</small>
-                <small>{max} m</small>
+                <Form.Range
+                    min={min}
+                    max={max}
+                    value={radius}
+                    onChange={(e) => setRadius(Number(e.target.value))}
+                    className="flex-grow-1 mx-2"
+                />
+
+                <small className="ms-1" style={{ width: '80px' }}>{max} m</small>
             </div>
-
         </Form.Group>
     );
 });

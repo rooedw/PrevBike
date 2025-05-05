@@ -1,7 +1,7 @@
-import {useEffect, useRef, useState} from 'react'
+import {useRef, useState} from 'react'
 import prevBikeLogo from './assets/prevbike_logo_landscape.png'
 import React from 'react';
-import { Container, Row, Col, Button, Form, InputGroup, Collapse } from 'react-bootstrap';
+import { Container, Button, Form, Spinner } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'leaflet/dist/leaflet.css';
 import './App.css'
@@ -25,6 +25,7 @@ function App() {
     const [searchPos, setSearchPos] = useState({lat: 49.0087159, lon: 8.403911516})
     const [placingMode, setPlacingMode] = useState(false);
     const [bikeProbability, setBikeProbability] = useState(0.0);
+    const [loading, setLoading] = useState(false);
 
     // set search pos to current position
     const handleSetSearchPos = () => {
@@ -44,6 +45,7 @@ function App() {
 
     const handleSearch = async () => {
         // probability?lat=49.011223016021454&lon=8.416850309144804&radius=500.0&weekRange=5&halfMinuteRange=30&requestModeString=ALL&requestTimestampString=2025-03-15T16:20:00
+        setLoading(true);
         const radius = radiusSliderRef.current.getRadius();
         const datetimeString = searchTimePickerRef.current.getDatetime().toISOString().slice(0, 19);
         const weekRange = advancedOptionsRef.current.getWeekRange();
@@ -54,8 +56,10 @@ function App() {
             const data = await response.json();
             console.log(data); // Success — do something with `data`
             setBikeProbability(data);
+            setLoading(false);
         } else {
             console.error(`Error ${response.status}: ${response.statusText}`);
+            setLoading(false);
         }
     };
 
@@ -70,7 +74,7 @@ function App() {
             </div>
             <div className="flex-grow-1 d-flex flex-md-row flex-column overflow-hidden">
                 {/* Sidebar / Einstellungen */}
-                <div className="settings-container p-3">
+                <div className="settings-container p-3 pt-1">
                     <Form className="settings-form">
                         <CityDropdown handleJump={handleJump}></CityDropdown>
 
@@ -81,32 +85,57 @@ function App() {
 
                         <Form.Group className="mb-3">
                             <RadiusSlider ref={radiusSliderRef}/>
-                            <Button variant={placingMode ? "danger" : "light"} className="mt-2" onClick={() => setPlacingMode(!placingMode)}>
-                                {placingMode ? "Klick auf die Karte..." : "Suchpositionsmarker platzieren"}
+                            <Button variant={placingMode ? "danger" : "light"} className="position-button" onClick={() => setPlacingMode(!placingMode)}>
+                                {placingMode ? "Klick auf die Karte..." : "Position setzen"}
                             </Button>
-                            <Button onClick={handleSetSearchPos} className="mt-2 ms-1">
+                            <Button onClick={handleSetSearchPos} className="ms-2">
                                 <FontAwesomeIcon icon={faLocationDot} />
                             </Button>
                         </Form.Group>
 
-                        <AdvancedOptions ref={advancedOptionsRef} searchPos={searchPos} setSearchPos={setSearchPos}/>
                         <LocationComponent ref={locationRef}/>
+
+                        <div className="d-flex align-items-center justify-content-between mb-3">
+                            <div className="flex-grow-1 me-2">
+                                <Button variant="primary" className="w-100" onClick={handleSearch}>Suche starten</Button>
+                            </div>
+
+                            <div
+                                className="bg-light text-dark p-1 border rounded"
+                                style={{ minWidth: '160px', textAlign: 'center' }}
+                            >
+                                <div style={{ fontSize: '0.9rem' }}>Wahrscheinlichkeit:</div>
+                                <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
+                                    {loading ? (
+                                        <Spinner
+                                            as="span"
+                                            animation="border"
+                                            size="sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                            className="me-2"
+                                        />
+                                    ): Math.round(bikeProbability * 100)} %
+
+                                </div>
+                            </div>
+                        </div>
+
 
                         <Button variant="light" className="mb-3">Suche speichern</Button>
                         <Button variant="light" className="mb-3">Suche laden</Button>
-                        <Button variant="primary" className="mb-3" onClick={handleSearch}>Suche starten</Button>
 
-                        <div className="bg-light text-dark p-2">
-                            Wahrscheinlichkeit für Zeitraum x - y: <strong>{bikeProbability*100}%</strong>
-                        </div>
+
 
                         <Form.Check type="checkbox" label="nextbikes anzeigen" defaultChecked className="mt-2" />
                         <Form.Check type="checkbox" label="Rückgabebereich anzeigen" defaultChecked />
+
+                        <AdvancedOptions ref={advancedOptionsRef} searchPos={searchPos} setSearchPos={setSearchPos}/>
+
                     </Form>
                 </div>
 
                 {/* Karte */}
-
                 <div className="map-container position-relative">
 
                     <BikeMap

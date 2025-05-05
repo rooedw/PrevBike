@@ -28,7 +28,7 @@ const CityDropdown = ({handleJump}) => {
     }
 
     return (
-        <Form.Group className="mb-3">
+        <Form.Group className="mb-2">
             <Form.Label>Stadt</Form.Label>
             <Form.Control as="select" onChange={handleCityChange}>
             {cities.map((city) => (
