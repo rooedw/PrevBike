@@ -23,7 +23,7 @@ const AdvancedOptions = forwardRef(({searchPos, setSearchPos}, ref) => {
 
 
     return (
-        <Form.Group className="mb-3 p-2" style={{border: '2px solid darkgray'}}>
+        <Form.Group className="mb-3 mt-3 p-2" style={{border: '2px solid darkgray'}}>
             <Form.Label
                 onClick={() => setShowAdvanced(!showAdvanced)}
                 aria-controls="advanced-options"

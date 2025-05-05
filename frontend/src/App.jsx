@@ -54,7 +54,7 @@ function App() {
         const response = await fetch(`http://localhost:8080/bikeapi/probability?lat=${searchPos.lat}&lon=${searchPos.lon}&radius=${radius}&weekRange=${weekRange}&halfMinuteRange=${halfMinuteRange}&requestModeString=${requestModeString}&requestTimestampString=${datetimeString}`);
         if (response.ok) {
             const data = await response.json();
-            console.log(data); // Success — do something with `data`
+            console.log(data);
             setBikeProbability(data);
             setLoading(false);
         } else {
@@ -70,7 +70,7 @@ function App() {
             <div className="app-header d-flex justify-content-between align-items-center px-4">
                 <Button variant="light" size="sm">🌐 DE</Button>
                 <img src={prevBikeLogo} alt="PrevBike Logo" className="logo-center" />
-                <Button variant="light" size="sm">ℹ️ Impressum</Button>
+                <Button variant="light" size="sm">Impressum</Button>
             </div>
             <div className="flex-grow-1 d-flex flex-md-row flex-column overflow-hidden">
                 {/* Sidebar / Einstellungen */}
@@ -107,25 +107,15 @@ function App() {
                                 <div style={{ fontSize: '0.9rem' }}>Wahrscheinlichkeit:</div>
                                 <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
                                     {loading ? (
-                                        <Spinner
-                                            as="span"
-                                            animation="border"
-                                            size="sm"
-                                            role="status"
-                                            aria-hidden="true"
-                                            className="me-2"
-                                        />
+                                        <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2"/>
                                     ): Math.round(bikeProbability * 100)} %
 
                                 </div>
                             </div>
                         </div>
 
-
                         <Button variant="light" className="mb-3">Suche speichern</Button>
                         <Button variant="light" className="mb-3">Suche laden</Button>
-
-
 
                         <Form.Check type="checkbox" label="nextbikes anzeigen" defaultChecked className="mt-2" />
                         <Form.Check type="checkbox" label="Rückgabebereich anzeigen" defaultChecked />
@@ -137,7 +127,6 @@ function App() {
 
                 {/* Karte */}
                 <div className="map-container position-relative">
-
                     <BikeMap
                         ref={mapRef}
                         mapSearchPos={searchPos}
