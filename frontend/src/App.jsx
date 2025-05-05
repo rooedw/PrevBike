@@ -59,12 +59,19 @@ function App() {
         }
     };
 
+
     return (
-        <Container fluid className="vh-100 d-flex flex-column">
-            <Row className="flex-grow-1">
-                {/* Sidebar */}
-                <Col md={2} className="p-3" style={{ backgroundColor: '#FFDCB9', color: 'black' }}>
-                    <Form>
+        <Container fluid className="vh-100 d-flex flex-column app-container">
+            {/* Header — always at top of page */}
+            <div className="app-header d-flex justify-content-between align-items-center px-4">
+                <Button variant="light" size="sm">🌐 DE</Button>
+                <img src={prevBikeLogo} alt="PrevBike Logo" className="logo-center" />
+                <Button variant="light" size="sm">ℹ️ Impressum</Button>
+            </div>
+            <div className="flex-grow-1 d-flex flex-md-row flex-column overflow-hidden">
+                {/* Sidebar / Einstellungen */}
+                <div className="settings-container p-3">
+                    <Form className="settings-form">
                         <CityDropdown handleJump={handleJump}></CityDropdown>
 
                         <Form.Group className="mb-3">
@@ -96,25 +103,21 @@ function App() {
                         <Form.Check type="checkbox" label="nextbikes anzeigen" defaultChecked className="mt-2" />
                         <Form.Check type="checkbox" label="Rückgabebereich anzeigen" defaultChecked />
                     </Form>
-                </Col>
+                </div>
 
-                {/* Main View */}
-                <Col md={10} className="p-0 position-relative">
-                    <div className="rounded-header d-flex justify-content-between align-items-center px-4">
-                        <Button variant="light" size="sm">🌐 DE</Button>
+                {/* Karte */}
 
-                        <img
-                            src={prevBikeLogo}
-                            alt="PrevBike Logo"
-                            className="logo-center"
-                        />
+                <div className="map-container position-relative">
 
-                        <Button variant="light" size="sm">ℹ️ Impressum</Button>
-                    </div>
-
-                    <BikeMap ref={mapRef} mapSearchPos={searchPos} setSearchPos={setSearchPos} placingMode={placingMode} setPlacingMode={setPlacingMode}></BikeMap>
-                </Col>
-            </Row>
+                    <BikeMap
+                        ref={mapRef}
+                        mapSearchPos={searchPos}
+                        setSearchPos={setSearchPos}
+                        placingMode={placingMode}
+                        setPlacingMode={setPlacingMode}
+                    />
+                </div>
+            </div>
         </Container>
     );
 }

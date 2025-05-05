@@ -4,25 +4,6 @@
     font-style: normal;
 }
 
-.rounded-header {
-    position: absolute;
-    top: 0px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60%;
-    height: 75px;
-    background-color: rgba(255, 107, 0, 0.65); /* half-transparent orange */
-    color: white;
-    border-radius: 0px 0px 24px 24px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    pointer-events: none;
-}
-
-.rounded-header .btn {
-    pointer-events: auto;
-}
-
 .logo-center {
     height: 50px;
     background-color: transparent;
@@ -93,3 +74,98 @@ input[type=range]:focus {
 input[type=range]:focus::-webkit-slider-thumb {
     box-shadow: 0 0 0 3px rgba(255,165,0,0.3);
 }
+
+.app-container {
+    overflow: hidden;
+    padding: 0;
+}
+
+.settings-container {
+    background-color: #FFDCB9;
+    color: black;
+    overflow-y: auto;
+}
+
+.settings-form {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.map-container {
+    flex-grow: 1;
+}
+
+/* Desktop: horizontale Anordnung */
+@media (min-width: 768px) {
+    .settings-container {
+        width: 25%;
+        max-width: 300px;
+    }
+    .map-container {
+        width: 75%;
+    }
+
+    .app-header {
+        position: absolute;
+        top: 0;
+        left: calc(60%);
+        transform: translateX(-50%);
+        width: 50%;
+        border-radius: 0 0 24px 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+
+}
+
+/* Mobile: vertikale Anordnung */
+@media (max-width: 767.98px) {
+    .app-header {
+        position: static;
+        width: 100%;
+        height: 60px;
+        border-radius: 0;
+        box-shadow: none;
+        transform: none;
+    }
+
+    .flex-md-row {
+        flex-direction: column !important;
+    }
+
+    .settings-container {
+        height: 50%;
+        width: 100%;
+        overflow-y: auto;
+    }
+
+    .map-container {
+        height: 50%;
+        width: 100%;
+    }
+
+}
+
+.app-header {
+    background-color: rgba(255, 107, 0, 0.65);
+    color: white;
+    z-index: 1000;
+    height: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    pointer-events: none;
+}
+
+.app-header .btn {
+    pointer-events: auto;
+}
+
+.logo-center {
+    height: 50px;
+    background-color: transparent;
+    padding: 0;
+}
+
