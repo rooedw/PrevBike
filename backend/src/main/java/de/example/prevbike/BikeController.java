@@ -17,7 +17,8 @@ import de.example.prevbike.PostgisService.RequestMode;
 @RequestMapping("/bikeapi")
 public class BikeController {
     private static final float MAX_RADIUS = 5000f;
-    private static final float MAX_HALF_MINUTE_RANGE = 720;
+    private static final int MAX_WEEK_RANGE = 520;
+    private static final int MAX_HALF_MINUTE_RANGE = 720;
 
 
     private final PostgisService postgisService;
@@ -50,12 +51,12 @@ public class BikeController {
                                     @RequestParam int halfMinuteRange,
                                     @RequestParam String requestModeString,
                                     @RequestParam String requestTimestampString) {
-        System.out.println("Requested parameters: " + lat + ", " + lon + ", " + radius + ", " + weekRange + ", " + halfMinuteRange + ", " + requestModeString + ", " + requestTimestampString);
+        System.out.println("Requested parameters (without lat/lon): " + radius + ", " + weekRange + ", " + halfMinuteRange + ", " + requestModeString + ", " + requestTimestampString);
 
         if (lat > 90f || lat < -90f || lon > 180f || lon < -180f) throw new InvalidParameterException("Illegal coordinates");
         if (radius < 0 || radius > MAX_RADIUS) throw new InvalidParameterException("Illegal radius");
-        if (weekRange < 0) throw new InvalidParameterException("Illegal week range");
-        if (halfMinuteRange < 0 || halfMinuteRange > MAX_HALF_MINUTE_RANGE) throw new InvalidParameterException("Illegal half minute range");
+        if (weekRange <= 0 || weekRange > MAX_WEEK_RANGE) throw new InvalidParameterException("Illegal week range");
+        if (halfMinuteRange <= 0 || halfMinuteRange > MAX_HALF_MINUTE_RANGE) throw new InvalidParameterException("Illegal half minute range");
 
         RequestMode requestMode;
         try {
