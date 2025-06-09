@@ -6,6 +6,12 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.sql.Timestamp;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 
 
 @Service
@@ -86,6 +92,21 @@ public class PostgisService {
         // requestMode == RequestMode.ALL  --> nop
 
         return sql;
+    }
+
+    public BikePositionResponse getCurrentBikes() {
+        String sqlStatement = "SELECT ST_Y(location::geometry) AS lat, ST_X(location::geometry) AS lon FROM bike_positions WHERE timestamp = (SELECT timestamp FROM bike_positions ORDER BY entryId DESC LIMIT 1);";
+
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sqlStatement);
+        List<Double> latList = new ArrayList<>();
+        List<Double> lonList = new ArrayList<>();
+
+        for (Map<String, Object> row : rows) {
+            latList.add(((Number) row.get("lat")).doubleValue());
+            lonList.add(((Number) row.get("lon")).doubleValue());
+        }
+
+        return new BikePositionResponse(latList, lonList);
     }
 
 }

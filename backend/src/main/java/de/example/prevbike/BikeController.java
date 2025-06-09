@@ -1,5 +1,6 @@
 package de.example.prevbike;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,6 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 import de.example.prevbike.PostgisService.RequestMode;
+import de.example.prevbike.BikePositionResponse;
 
 @RestController
 @RequestMapping("/bikeapi")
@@ -74,5 +76,12 @@ public class BikeController {
         }
 
         return postgisService.getBikeProbability(requestMode, lat, lon, radius, requestTimestamp, weekRange, halfMinuteRange);
+    }
+
+    @CrossOrigin
+    @GetMapping("/currentBikes")
+    public ResponseEntity<BikePositionResponse> currentBikes() {
+        BikePositionResponse bikePositionResponse = postgisService.getCurrentBikes();
+        return ResponseEntity.ok(bikePositionResponse);
     }
 }
