@@ -13,15 +13,16 @@ import RadiusSlider from "./RadiusSlider.jsx";
 import LocationComponent from "./LocationComponent.jsx";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLocationDot } from '@fortawesome/free-solid-svg-icons';
+import { ToastContainer, toast } from 'react-toastify';
 
 
 
 function App() {
     const locationRef = useRef();
     const mapRef = useRef();
-    const radiusSliderRef = useRef();
     const searchTimePickerRef = useRef();
     const advancedOptionsRef = useRef();
+    const [radius, setRadius] = useState(100);
     const [searchPos, setSearchPos] = useState({lat: 49.0087159, lon: 8.403911516})
     const [placingMode, setPlacingMode] = useState(false);
     const [bikeProbability, setBikeProbability] = useState(0.0);
@@ -46,7 +47,6 @@ function App() {
     const handleSearch = async () => {
         // probability?lat=49.011223016021454&lon=8.416850309144804&radius=500.0&weekRange=5&halfMinuteRange=30&requestModeString=ALL&requestTimestampString=2025-03-15T16:20:00
         setLoading(true);
-        const radius = radiusSliderRef.current.getRadius();
         const datetimeString = searchTimePickerRef.current.getDatetime().toISOString().slice(0, 19);
         const weekRange = advancedOptionsRef.current.getWeekRange();
         const halfMinuteRange = advancedOptionsRef.current.getHalfMinuteRange();
@@ -58,7 +58,9 @@ function App() {
             setBikeProbability(data);
             setLoading(false);
         } else {
-            console.error(`Error ${response.status}: ${response.statusText}`);
+            const errorText = await response.text();
+            console.error(`Error ${response.status}: ${errorText}`);
+            toast.error(`Error ${response.status}: ${errorText}`);
             setLoading(false);
         }
     };
@@ -66,6 +68,7 @@ function App() {
 
     return (
         <Container fluid className="vh-100 d-flex flex-column app-container">
+            <ToastContainer />
             {/* Header — always at top of page */}
             <div className="app-header d-flex justify-content-between align-items-center px-4">
                 <Button variant="light" size="sm">🌐 DE</Button>
@@ -84,7 +87,7 @@ function App() {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <RadiusSlider ref={radiusSliderRef}/>
+                            <RadiusSlider radius={radius} setRadius={setRadius}/>
                             <Button variant={placingMode ? "danger" : "light"} className="position-button" onClick={() => setPlacingMode(!placingMode)}>
                                 {placingMode ? "Klick auf die Karte..." : "Position setzen"}
                             </Button>
@@ -133,6 +136,7 @@ function App() {
                         setSearchPos={setSearchPos}
                         placingMode={placingMode}
                         setPlacingMode={setPlacingMode}
+                        radius={radius}
                     />
                 </div>
             </div>

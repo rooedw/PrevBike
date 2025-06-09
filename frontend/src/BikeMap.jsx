@@ -1,5 +1,5 @@
 import React, {forwardRef, useEffect, useImperativeHandle, useRef, useState} from 'react';
-import {MapContainer, Marker, Popup, TileLayer, useMap, ZoomControl, useMapEvents} from "react-leaflet";
+import {MapContainer, Marker, Circle, Popup, TileLayer, useMap, ZoomControl, useMapEvents} from "react-leaflet";
 
 
 function ClickHandler({ placingMode, setPlacingMode, setSearchPos }) {
@@ -27,7 +27,7 @@ const MapController = forwardRef((props, ref) => {
     return null;
 });
 
-const BikeMap = forwardRef(({mapSearchPos, setSearchPos, placingMode, setPlacingMode}, ref) => {
+const BikeMap = forwardRef(({mapSearchPos, setSearchPos, placingMode, setPlacingMode, radius}, ref) => {
 
     return (
         <MapContainer
@@ -46,6 +46,16 @@ const BikeMap = forwardRef(({mapSearchPos, setSearchPos, placingMode, setPlacing
             <Marker position={[mapSearchPos.lat, mapSearchPos.lon]}>
                 <Popup>SearchPos</Popup>
             </Marker>
+
+            <Circle
+                center={[mapSearchPos.lat, mapSearchPos.lon]}
+                radius={radius} // in meters
+                pathOptions={{
+                    color: 'orange',
+                    fillColor: 'orange',
+                    fillOpacity: 0.3,
+                }}
+            />
 
             <ZoomControl position="bottomright" />
 
