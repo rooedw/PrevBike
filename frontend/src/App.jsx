@@ -27,6 +27,23 @@ function App() {
     const [placingMode, setPlacingMode] = useState(false);
     const [bikeProbability, setBikeProbability] = useState(0.0);
     const [loading, setLoading] = useState(false);
+    const [bikePositions, setBikePositions] = useState([]);
+
+
+    const handleCurrentBikePositions = async () => {
+        const response = await fetch(`http://localhost:8080/bikeapi/currentBikes`);
+        if (response.ok) {
+            const data = await response.json();
+            const positions = data.lat.slice(0,2000).map((lat, i) => [lat, data.lon[i]]);  // todo remove slicing
+            console.log(positions);
+            setBikePositions(positions);
+
+        } else {
+            const errorText = await response.text();
+            console.error(`Error ${response.status}: ${errorText}`);
+            toast.error(`Error ${response.status}: ${errorText}`);
+        }
+    };
 
     // set search pos to current position
     const handleSetSearchPos = () => {
@@ -120,6 +137,7 @@ function App() {
                         <Button variant="light" className="mb-3">Suche speichern</Button>
                         <Button variant="light" className="mb-3">Suche laden</Button>
 
+                        <Button onClick={handleCurrentBikePositions}>Refresh nextbikes</Button>
                         <Form.Check type="checkbox" label="nextbikes anzeigen" defaultChecked className="mt-2" />
                         <Form.Check type="checkbox" label="Rückgabebereich anzeigen" defaultChecked />
 
@@ -137,6 +155,7 @@ function App() {
                         placingMode={placingMode}
                         setPlacingMode={setPlacingMode}
                         radius={radius}
+                        bikePositions={bikePositions}
                     />
                 </div>
             </div>

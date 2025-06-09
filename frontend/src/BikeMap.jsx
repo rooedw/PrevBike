@@ -1,5 +1,7 @@
 import React, {forwardRef, useEffect, useImperativeHandle, useRef, useState} from 'react';
 import {MapContainer, Marker, Circle, Popup, TileLayer, useMap, ZoomControl, useMapEvents} from "react-leaflet";
+import BikeMarkers from "./BikeMarkers.jsx";
+import {forEach} from "react-bootstrap/ElementChildren";
 
 
 function ClickHandler({ placingMode, setPlacingMode, setSearchPos }) {
@@ -22,12 +24,18 @@ const MapController = forwardRef((props, ref) => {
             console.log("Jumping to", lat, lon);
             map.setView([lat, lon], map.getZoom());
         },
+        drawBikes: (lats, lons) => {
+            for(let i = 0; i < lats.length; i++) {
+                map.drawMarker([lats[i], lons[i]], map.getZoom());
+            }
+
+        },
     }));
 
     return null;
 });
 
-const BikeMap = forwardRef(({mapSearchPos, setSearchPos, placingMode, setPlacingMode, radius}, ref) => {
+const BikeMap = forwardRef(({mapSearchPos, setSearchPos, placingMode, setPlacingMode, radius, bikePositions}, ref) => {
 
     return (
         <MapContainer
@@ -46,6 +54,8 @@ const BikeMap = forwardRef(({mapSearchPos, setSearchPos, placingMode, setPlacing
             <Marker position={[mapSearchPos.lat, mapSearchPos.lon]}>
                 <Popup>SearchPos</Popup>
             </Marker>
+
+            <BikeMarkers bikePositions={bikePositions} />
 
             <Circle
                 center={[mapSearchPos.lat, mapSearchPos.lon]}
