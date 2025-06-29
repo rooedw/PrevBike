@@ -1,4 +1,4 @@
-import {useRef, useState} from 'react'
+import {useEffect, useRef, useState} from 'react'
 import prevBikeLogo from './assets/prevbike_logo_landscape.png'
 import React from 'react';
 import { Container, Button, Form, Spinner } from 'react-bootstrap';
@@ -28,14 +28,27 @@ function App() {
     const [bikeProbability, setBikeProbability] = useState(0.0);
     const [loading, setLoading] = useState(false);
     const [bikePositions, setBikePositions] = useState([]);
+    const [showBikes, setShowBikes] = useState(false);
+    const [showFlexzones, setShowFlexzones] = useState(true);
+    const [staticInfos, setStaticInfos] = useState(false);
+
+
+    useEffect(() => {
+        fetch('/static_infos.json')
+            .then((res) => res.json())
+            .then((data) => {
+                setStaticInfos(data);
+            })
+            .catch((err) => console.error('Error loading static data:', err));
+    }, []);
 
 
     const handleCurrentBikePositions = async () => {
         const response = await fetch(`http://localhost:8080/bikeapi/currentBikes`);
         if (response.ok) {
             const data = await response.json();
-            const positions = data.lat.slice(0,2000).map((lat, i) => [lat, data.lon[i]]);  // todo remove slicing
-            console.log(positions);
+            const positions = data.lat.map((lat, i) => [lat, data.lon[i]]);
+            //console.log(positions);
             setBikePositions(positions);
 
         } else {
@@ -71,7 +84,7 @@ function App() {
         const response = await fetch(`http://localhost:8080/bikeapi/probability?lat=${searchPos.lat}&lon=${searchPos.lon}&radius=${radius}&weekRange=${weekRange}&halfMinuteRange=${halfMinuteRange}&requestModeString=${requestModeString}&requestTimestampString=${datetimeString}`);
         if (response.ok) {
             const data = await response.json();
-            console.log(data);
+            //console.log(data);
             setBikeProbability(data);
             setLoading(false);
         } else {
@@ -79,6 +92,19 @@ function App() {
             console.error(`Error ${response.status}: ${errorText}`);
             toast.error(`Error ${response.status}: ${errorText}`);
             setLoading(false);
+        }
+    };
+
+    const handleShowBikesCheckboxChange = (e) => {
+        const isChecked = e.target.checked;
+
+        if (isChecked) {
+            console.log("nextbikes anzeigen");
+            setShowBikes(true);
+            handleCurrentBikePositions()
+        } else {
+            console.log("nextbikes ausblenden");
+            setShowBikes(false);
         }
     };
 
@@ -96,7 +122,7 @@ function App() {
                 {/* Sidebar / Einstellungen */}
                 <div className="settings-container p-3 pt-1">
                     <Form className="settings-form">
-                        <CityDropdown handleJump={handleJump}></CityDropdown>
+                        <CityDropdown handleJump={handleJump} staticInfos={staticInfos}></CityDropdown>
 
                         <Form.Group className="mb-3">
                             <Form.Label>Zeitpunkt</Form.Label>
@@ -138,8 +164,20 @@ function App() {
                         <Button variant="light" className="mb-3">Suche laden</Button>
 
                         <Button onClick={handleCurrentBikePositions}>Refresh nextbikes</Button>
-                        <Form.Check type="checkbox" label="nextbikes anzeigen" defaultChecked className="mt-2" />
-                        <Form.Check type="checkbox" label="Rückgabebereich anzeigen" defaultChecked />
+
+                        <Form.Check
+                            type="checkbox"
+                            label="nextbikes anzeigen"
+                            className="mt-2"
+                            onChange={handleShowBikesCheckboxChange}
+                        />
+                        <Form.Check type="checkbox" label="" defaultChecked />
+                        <Form.Check
+                            type="checkbox"
+                            label="Rückgabebereich anzeigen"
+                            className="mt-2"
+                            onChange={handleCurrentBikePositions}
+                        />
 
                         <AdvancedOptions ref={advancedOptionsRef} searchPos={searchPos} setSearchPos={setSearchPos}/>
 
@@ -156,6 +194,9 @@ function App() {
                         setPlacingMode={setPlacingMode}
                         radius={radius}
                         bikePositions={bikePositions}
+                        showBikes={showBikes}
+                        showFlexzones={showFlexzones}
+                        staticInfos={staticInfos}
                     />
                 </div>
             </div>

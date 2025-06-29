@@ -1,24 +1,22 @@
 import {Form} from "react-bootstrap";
 import React, { useEffect, useState } from 'react';
 
-const CityDropdown = ({handleJump}) => {
+const CityDropdown = ({handleJump, staticInfos}) => {
     const [cities, setCities] = useState([]);
 
     useEffect(() => {
-        fetch('/static_infos.json')
-            .then((res) => res.json())
-            .then((data) => {
-                const sortedCities = data.cities.sort((a, b) =>
-                    a.cityName.trim().localeCompare(b.cityName.trim())
-                )
-                setCities(sortedCities)
-                if (sortedCities.length > 0) {
-                    console.log("calling handlejump")
-                    handleJump(sortedCities[0])
-                }
-            })
-            .catch((err) => console.error('Error loading cities:', err));
-    }, []);
+        if (!staticInfos) {
+            return;
+        }
+        const sortedCities = staticInfos.cities.sort((a, b) =>
+            a.cityName.trim().localeCompare(b.cityName.trim())
+        )
+        setCities(sortedCities)
+        if (sortedCities.length > 0) {
+            console.log("calling handlejump")
+            handleJump(sortedCities[0])
+        }
+    }, [staticInfos]);
 
     const handleCityChange = (e) => {
         const selectedCityId = parseInt(e.target.value)

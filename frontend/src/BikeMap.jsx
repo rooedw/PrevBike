@@ -1,6 +1,7 @@
 import React, {forwardRef, useEffect, useImperativeHandle, useRef, useState} from 'react';
 import {MapContainer, Marker, Circle, Popup, TileLayer, useMap, ZoomControl, useMapEvents} from "react-leaflet";
 import BikeMarkers from "./BikeMarkers.jsx";
+import Flexzones from "./Flexzones.jsx";
 import {forEach} from "react-bootstrap/ElementChildren";
 
 
@@ -35,7 +36,16 @@ const MapController = forwardRef((props, ref) => {
     return null;
 });
 
-const BikeMap = forwardRef(({mapSearchPos, setSearchPos, placingMode, setPlacingMode, radius, bikePositions}, ref) => {
+const BikeMap = forwardRef(({mapSearchPos, setSearchPos, placingMode, setPlacingMode, radius, bikePositions, showBikes, showFlexzones, staticInfos}, ref) => {
+
+    const orangeIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png', // orange color hex: #FFA500
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        shadowSize: [41, 41]
+    });
 
     return (
         <MapContainer
@@ -50,12 +60,11 @@ const BikeMap = forwardRef(({mapSearchPos, setSearchPos, placingMode, setPlacing
             />
             <MapController ref={ref} />
             <ClickHandler placingMode={placingMode} setPlacingMode={setPlacingMode} setSearchPos={setSearchPos} />
+#
 
-            <Marker position={[mapSearchPos.lat, mapSearchPos.lon]}>
+            <Marker position={[mapSearchPos.lat, mapSearchPos.lon]} icon={orangeIcon} zIndexOffset={1000}>
                 <Popup>SearchPos</Popup>
             </Marker>
-
-            <BikeMarkers bikePositions={bikePositions} />
 
             <Circle
                 center={[mapSearchPos.lat, mapSearchPos.lon]}
@@ -65,7 +74,12 @@ const BikeMap = forwardRef(({mapSearchPos, setSearchPos, placingMode, setPlacing
                     fillColor: 'orange',
                     fillOpacity: 0.3,
                 }}
+                zIndexOffset={-1000}
             />
+
+            {showBikes && <BikeMarkers bikePositions={bikePositions} />}
+
+            {showFlexzones && <Flexzones staticInfos={staticInfos} />}
 
             <ZoomControl position="bottomright" />
 
