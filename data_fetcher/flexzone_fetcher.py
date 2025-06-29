@@ -1,5 +1,11 @@
 import requests
 import json
+import os
+
+from dotenv import load_dotenv  # pip install python-dotenv
+
+# Load variables from .env into environment
+load_dotenv()
 
 
 FLEXZONE_API_URL = os.getenv("FLEXZONE_API_URL")
@@ -55,15 +61,18 @@ def convert_data(flexzone_data, cities_data):
         coordinates = feature["geometry"]["coordinates"]  # list of lat-lon-list
 
         town_id = int(feature['properties']['cityId'])
+        category = feature['properties']['category']
+
+        zone = {"category": category, "coordinates" : coordinates}
 
         if town_id not in townId_to_region_name.keys():
             continue
         region_name = townId_to_region_name[town_id]
 
         if region_name in flexzones_dict:
-            flexzones_dict[region_name]['coordinates'].extend(coordinates)
+            flexzones_dict[region_name]['zones'].append(zone)
         else:
-            flexzones_dict[region_name] = {'coordinates': coordinates}
+            flexzones_dict[region_name] = {"zones": [zone]}
 
     flexzones = [
         {**value, "regionName": key} for key, value in flexzones_dict.items()
