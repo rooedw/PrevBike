@@ -6,6 +6,8 @@ backend/build/
 .gradle/
 build/
 
+frontend/public/static_infos.json
+
 ### STS ###
 .apt_generated
 .classpath
